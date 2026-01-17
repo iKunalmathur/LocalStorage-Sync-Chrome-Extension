@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Token Sync",
+  "name": "LocalSync",
   "version": "1.0.0",
-  "description": "Sync access token from Dev environment localStorage to localhost.",
+  "description": "Sync localStorage data between different environments with ease.",
   "permissions": ["scripting", "tabs", "storage"],
   "host_permissions": [
     "<all_urls>"
   ],
   "action": {
-    "default_title": "Sync token to localhost",
+    "default_title": "Sync localStorage between environments",
     "default_popup": "popup.html"
   },
   "icons": {

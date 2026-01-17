@@ -2,15 +2,15 @@ const syncBtn = document.getElementById('syncBtn');
 const statusDiv = document.getElementById('status');
 const settingsToggle = document.getElementById('settingsToggle');
 const settingsContent = document.getElementById('settingsContent');
-const devHostInput = document.getElementById('devHost');
-const localhostHostInput = document.getElementById('localhostHost');
-const tokenKeyInput = document.getElementById('tokenKey');
+const sourceHostInput = document.getElementById('sourceHost');
+const targetHostInput = document.getElementById('targetHost');
+const storageKeyInput = document.getElementById('storageKey');
 const saveBtn = document.getElementById('saveBtn');
 
 // Current settings
-let currentDevHost = '';
-let currentLocalhostHost = '';
-let currentTokenKey = 'access_token';
+let currentSourceHost = '';
+let currentTargetHost = '';
+let currentStorageKey = 'access_token';
 
 function showStatus(message, type = 'success') {
   statusDiv.textContent = message;
@@ -25,89 +25,89 @@ function setLoading(isLoading) {
   if (isLoading) {
     syncBtn.innerHTML = '<span class="spinner"></span>Syncing...';
   } else {
-    syncBtn.innerHTML = 'Sync Token Now';
+      syncBtn.innerHTML = 'Sync Now';
   }
 }
 
-async function getTokenFromDevTab() {
-  const devPattern = currentDevHost + '/*';
-  const devTabs = await chrome.tabs.query({ url: devPattern });
-  if (!devTabs.length) {
-    throw new Error("No Dev tab open. Please open " + currentDevHost);
+async function getDataFromSource() {
+    const sourcePattern = currentSourceHost + '/*';
+    const sourceTabs = await chrome.tabs.query({ url: sourcePattern });
+    if (!sourceTabs.length) {
+        throw new Error("No source tab open. Please open " + currentSourceHost);
   }
 
   const [result] = await chrome.scripting.executeScript({
-    target: { tabId: devTabs[0].id },
+      target: { tabId: sourceTabs[0].id },
     func: (key) => localStorage.getItem(key),
-    args: [currentTokenKey]
+      args: [currentStorageKey]
   });
 
-  const token = result?.result;
-  if (!token) {
-    throw new Error(`Token not found for key "${currentTokenKey}"`);
+    const data = result?.result;
+    if (!data) {
+        throw new Error(`Data not found for key "${currentStorageKey}"`);
   }
-  return token;
+    return data;
 }
 
-async function setTokenOnLocalhost(token) {
-  const localhostPattern = 'http://localhost:*/*';
-  let localTabs = await chrome.tabs.query({ url: localhostPattern });
+async function setDataOnTarget(data) {
+    const targetPattern = 'http://localhost:*/*';
+    let targetTabs = await chrome.tabs.query({ url: targetPattern });
 
-  if (!localTabs.length) {
-    const targetUrl = currentLocalhostHost || 'http://localhost:3000';
+    if (!targetTabs.length) {
+        const targetUrl = currentTargetHost || 'http://localhost:3000';
     const tab = await chrome.tabs.create({ url: targetUrl });
-    localTabs = [tab];
+      targetTabs = [tab];
     await new Promise((r) => setTimeout(r, 800));
   }
 
   await chrome.scripting.executeScript({
-    target: { tabId: localTabs[0].id },
+      target: { tabId: targetTabs[0].id },
     func: (key, value) => {
       localStorage.setItem(key, value);
       location.reload();
     },
-    args: [currentTokenKey, token]
+      args: [currentStorageKey, data]
   });
 }
 
 // Load saved settings on popup open
 async function loadSettings() {
-  const result = await chrome.storage.sync.get(['devHost', 'localhostHost', 'tokenKey']);
-  currentDevHost = result.devHost || '';
-  currentLocalhostHost = result.localhostHost || '';
-  currentTokenKey = result.tokenKey || 'access_token';
+    const result = await chrome.storage.sync.get(['sourceHost', 'targetHost', 'storageKey']);
+    currentSourceHost = result.sourceHost || '';
+    currentTargetHost = result.targetHost || '';
+    currentStorageKey = result.storageKey || 'access_token';
   
-  devHostInput.value = currentDevHost;
-  localhostHostInput.value = currentLocalhostHost;
-  tokenKeyInput.value = currentTokenKey;
+    sourceHostInput.value = currentSourceHost;
+    targetHostInput.value = currentTargetHost;
+    storageKeyInput.value = currentStorageKey;
 }
 
 // Save settings
 saveBtn.addEventListener('click', async () => {
-  const devHost = devHostInput.value.trim();
-  const localhostHost = localhostHostInput.value.trim();
-  const tokenKey = tokenKeyInput.value.trim();
+    const sourceHost = sourceHostInput.value.trim();
+    const targetHost = targetHostInput.value.trim();
+    const storageKey = storageKeyInput.value.trim();
   
-  if (!devHost || !tokenKey) {
-    showStatus('✗ Dev URL and token key are required', 'error');
+    if (!sourceHost || !storageKey) {
+        showStatus('✗ Source URL and storage key are required', 'error');
     return;
   }
   
   // Validate URLs
   try {
-    new URL(devHost);
-    if (localhostHost) {
-      new URL(localhostHost);
+      new URL(sourceHost);
+      if (targetHost) {
+          new URL(targetHost);
     }
   } catch (e) {
     showStatus('✗ Invalid URL format', 'error');
     return;
   }
   
-  await chrome.storage.sync.set({ devHost, localhostHost, tokenKey });
-  currentDevHost = devHost;
-  currentLocalhostHost = localhostHost;
-  currentTokenKey = tokenKey;
+    await chrome.storage.sync.set({ sourceHost, targetHost, storageKey });
+    currentSourceHost = sourceHost;
+    currentTargetHost = targetHost;
+    currentStorageKey = storageKey;
   showStatus('✓ Settings saved!', 'success');
 });
 
@@ -121,9 +121,9 @@ settingsToggle.addEventListener('click', () => {
 syncBtn.addEventListener('click', async () => {
   try {
     setLoading(true);
-    const token = await getTokenFromDevTab();
-    await setTokenOnLocalhost(token);
-    showStatus('✓ Token synced successfully!', 'success');
+      const data = await getDataFromSource();
+      await setDataOnTarget(data);
+      showStatus('✓ Storage synced successfully!', 'success');
   } catch (error) {
     showStatus('✗ ' + error.message, 'error');
   } finally {

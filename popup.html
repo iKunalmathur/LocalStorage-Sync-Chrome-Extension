@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Token Sync</title>
+<title>LocalSync</title>
   <style>
     * {
       margin: 0;
@@ -30,12 +30,12 @@
     }
 
     body::-webkit-scrollbar-thumb {
-      background: #f8d232;
+      background: #b89b24;
       border-radius: 3px;
     }
 
     body::-webkit-scrollbar-thumb:hover {
-      background: #fde047;
+      background: #eac926;
     }
 
     .header {
@@ -249,10 +249,10 @@
 <body>
   <div class="header">
     <div class="logo">
-      <img src="icons/icon-48.png" alt="Token Sync Icon">
+    <img src="icons/icon-48.png" alt="LocalSync Icon">
     </div>
-    <h1>Token Sync</h1>
-    <p class="subtitle">Dev → Localhost</p>
+    <h1>LocalSync</h1>
+    <p class="subtitle">Source → Target</p>
   </div>
 
   <div class="settings">
@@ -262,23 +262,23 @@
     </div>
     <div class="settings-content" id="settingsContent">
       <div class="form-group">
-        <label class="form-label" for="devHost">Dev Environment URL:</label>
-        <input type="text" id="devHost" class="form-input" placeholder="e.g., https://dev.example.com" value="">
+        <label class="form-label" for="sourceHost">Source Environment URL:</label>
+        <input type="text" id="sourceHost" class="form-input" placeholder="e.g., https://dev.example.com" value="">
       </div>
       <div class="form-group">
-        <label class="form-label" for="localhostHost">Localhost URL (optional):</label>
-        <input type="text" id="localhostHost" class="form-input" placeholder="e.g., http://localhost:3000" value="">
+        <label class="form-label" for="targetHost">Target Environment URL (optional):</label>
+        <input type="text" id="targetHost" class="form-input" placeholder="e.g., http://localhost:3000" value="">
       </div>
       <div class="form-group">
-        <label class="form-label" for="tokenKey">localStorage Token Key:</label>
-        <input type="text" id="tokenKey" class="form-input" placeholder="e.g., access_token" value="access_token">
+        <label class="form-label" for="storageKey">localStorage Key:</label>
+        <input type="text" id="storageKey" class="form-input" placeholder="e.g., access_token" value="access_token">
       </div>
       <button id="saveBtn" class="save-btn">Save Settings</button>
     </div>
   </div>
 
   <button id="syncBtn" class="sync-button">
-    Sync Token Now
+    Sync Now
   </button>
 
   <div id="status" class="status"></div>
@@ -287,15 +287,15 @@
     <div class="info-title">How it works:</div>
     <div class="info-item">
       <span class="dot"></span>
-      <span>Reads token from Dev environment</span>
+    <span>Reads data from source environment</span>
     </div>
     <div class="info-item">
       <span class="dot"></span>
-      <span>Writes to localhost localStorage</span>
+    <span>Writes to target's localStorage</span>
     </div>
     <div class="info-item">
       <span class="dot"></span>
-      <span>Auto-reloads localhost</span>
+    <span>Auto-reloads target page</span>
     </div>
   </div>
 
